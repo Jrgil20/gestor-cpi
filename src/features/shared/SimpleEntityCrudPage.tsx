@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { mensajeDeError } from '../../lib/errores'
 import type { SimpleEntity, SimpleEntityCrud } from './entityCrud'
 
 interface PageProps<T extends SimpleEntity> {
@@ -46,10 +47,10 @@ export function SimpleEntityCrudPage<T extends SimpleEntity>({ title, crud }: Pa
           Agregar
         </button>
       </form>
-      {crear.isError && <p role="alert">No se pudo crear: {(crear.error as Error).message}</p>}
+      {crear.isError && <p role="alert">No se pudo crear: {mensajeDeError(crear.error)}</p>}
 
       {isLoading && <p>Cargando...</p>}
-      {error && <p role="alert">No se pudo cargar la lista: {(error as Error).message}</p>}
+      {error && <p role="alert">No se pudo cargar la lista: {mensajeDeError(error)}</p>}
       {items && <SimpleEntityTable items={items} crud={crud} />}
     </section>
   )

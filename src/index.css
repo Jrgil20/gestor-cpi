@@ -124,6 +124,15 @@ h3 {
   margin-left: auto;
 }
 
+.nav .respaldo-indicator {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.nav .respaldo-indicator + button {
+  margin-left: 0.5rem;
+}
+
 /* ---- Pestañas ---- */
 
 .tabs {

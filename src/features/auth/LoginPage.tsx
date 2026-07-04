@@ -2,6 +2,7 @@
 // desde el dashboard de Supabase (Authentication → Users → Add user),
 // coherente con "un solo usuario en el MVP" (docs/06-arquitectura.md).
 import { useState, type FormEvent } from 'react'
+import { mensajeDeError } from '../../lib/errores'
 import { supabase } from '../../lib/supabase'
 
 export default function LoginPage() {
@@ -16,7 +17,7 @@ export default function LoginPage() {
     setError(null)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
-    if (error) setError(error.message)
+    if (error) setError(mensajeDeError(error))
   }
 
   return (

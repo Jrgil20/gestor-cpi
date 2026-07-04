@@ -1,5 +1,6 @@
 // F-01/F-05 — Gestión de productos y stock (RF-003, RF-010).
 import { useState, type FormEvent } from 'react'
+import { mensajeDeError } from '../../lib/errores'
 import type { Producto } from '../../types/entities'
 import {
   useActualizarNombreProducto,
@@ -34,10 +35,10 @@ export default function ProductosPage() {
           Agregar
         </button>
       </form>
-      {crear.isError && <p role="alert">No se pudo crear: {(crear.error as Error).message}</p>}
+      {crear.isError && <p role="alert">No se pudo crear: {mensajeDeError(crear.error)}</p>}
 
       {isLoading && <p>Cargando...</p>}
-      {error && <p role="alert">No se pudo cargar la lista: {(error as Error).message}</p>}
+      {error && <p role="alert">No se pudo cargar la lista: {mensajeDeError(error)}</p>}
       {productos && <ProductosTable productos={productos} />}
     </section>
   )

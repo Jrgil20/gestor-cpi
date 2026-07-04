@@ -2,6 +2,7 @@
 // cuentas por cobrar ordenables. El historial de transacciones ya lo
 // cubre el listado de Pedidos (F-02); aquí solo se filtra/ordena.
 import { useState } from 'react'
+import { mensajeDeError } from '../../lib/errores'
 import { saldoUsd } from '../../lib/money'
 import { usePedidos } from '../pedidos/usePedidos'
 
@@ -14,7 +15,7 @@ export default function PendientesPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
   if (isLoading) return <p>Cargando...</p>
-  if (error) return <p role="alert">No se pudo cargar: {(error as Error).message}</p>
+  if (error) return <p role="alert">No se pudo cargar: {mensajeDeError(error)}</p>
   if (!pedidos) return <p>Cargando...</p>
 
   const ventas = pedidos.filter((p) => p.tipo === 'venta')

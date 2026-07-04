@@ -11,6 +11,14 @@ async function pull<T>(table: string): Promise<T[]> {
   return data as T[]
 }
 
+const ULTIMA_SYNC_KEY = 'gestor-cpi:ultima-sync'
+
+/** Momento del último respaldo exitoso, o null si nunca se ha hecho. */
+export function getUltimaSync(): Date | null {
+  const valor = localStorage.getItem(ULTIMA_SYNC_KEY)
+  return valor ? new Date(valor) : null
+}
+
 export async function syncFromCloud(): Promise<void> {
   const [proveedores, clientes, productos, pedidos, pedidoItems, abonos] = await Promise.all([
     pull<Proveedor>('proveedores'),
@@ -50,4 +58,6 @@ export async function syncFromCloud(): Promise<void> {
       ])
     },
   )
+
+  localStorage.setItem(ULTIMA_SYNC_KEY, new Date().toISOString())
 }

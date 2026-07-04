@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { mensajeDeError } from '../../lib/errores'
 import { aBs, aUsd, saldoUsd } from '../../lib/money'
 import { AbonoForm } from './AbonoForm'
 import type { PedidoConDetalle } from './api'
@@ -32,7 +33,7 @@ export function PedidosList() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   if (isLoading) return <p>Cargando...</p>
-  if (error) return <p role="alert">No se pudo cargar la lista: {(error as Error).message}</p>
+  if (error) return <p role="alert">No se pudo cargar la lista: {mensajeDeError(error)}</p>
   if (!pedidos || pedidos.length === 0) return <p>Todavía no hay pedidos.</p>
 
   function handleMarcarEntregada(pedido: PedidoConDetalle) {
@@ -60,7 +61,7 @@ export function PedidosList() {
     <>
       {(marcarEntregada.isError || anular.isError) && (
         <p role="alert">
-          {((marcarEntregada.error ?? anular.error) as Error).message}
+          {mensajeDeError(marcarEntregada.error ?? anular.error)}
         </p>
       )}
       <table>
@@ -196,7 +197,7 @@ function PedidoRow({
               </ul>
             )}
             {eliminarAbono.isError && (
-              <p role="alert">No se pudo eliminar: {(eliminarAbono.error as Error).message}</p>
+              <p role="alert">No se pudo eliminar: {mensajeDeError(eliminarAbono.error)}</p>
             )}
             {!saldada && !anulado && <AbonoForm pedidoId={pedido.id} saldo={saldo} />}
           </td>

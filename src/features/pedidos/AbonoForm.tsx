@@ -1,5 +1,7 @@
 // RF-007 — Registrar un abono parcial sobre un pedido.
 import { useState, type FormEvent } from 'react'
+import { mensajeDeError } from '../../lib/errores'
+import { getUltimaTasa, guardarUltimaTasa } from '../../lib/tasa'
 import { hoyLocal } from '../../lib/fecha'
 import { aUsd } from '../../lib/money'
 import type { Moneda } from '../../types/entities'
@@ -11,7 +13,7 @@ export function AbonoForm({ pedidoId, saldo }: { pedidoId: string; saldo: number
   const crear = useCrearAbono()
   const [monto, setMonto] = useState(0)
   const [moneda, setMoneda] = useState<Moneda>('USD')
-  const [tasa, setTasa] = useState(1)
+  const [tasa, setTasa] = useState(getUltimaTasa())
   const [fecha, setFecha] = useState(hoyLocal())
   const [aviso, setAviso] = useState<string | null>(null)
 
@@ -30,7 +32,12 @@ export function AbonoForm({ pedidoId, saldo }: { pedidoId: string; saldo: number
     setAviso(null)
     crear.mutate(
       { pedido_id: pedidoId, monto, moneda, tasa_bs_por_usd: tasa, fecha },
-      { onSuccess: () => setMonto(0) },
+      {
+        onSuccess: () => {
+          guardarUltimaTasa(tasa)
+          setMonto(0)
+        },
+      },
     )
   }
 
@@ -62,7 +69,7 @@ export function AbonoForm({ pedidoId, saldo }: { pedidoId: string; saldo: number
         Registrar abono
       </button>
       {aviso && <p role="alert">{aviso}</p>}
-      {crear.isError && <p role="alert">No se pudo registrar: {(crear.error as Error).message}</p>}
+      {crear.isError && <p role="alert">No se pudo registrar: {mensajeDeError(crear.error)}</p>}
     </form>
   )
 }

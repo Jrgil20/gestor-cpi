@@ -1,19 +1,17 @@
 // F-06 — Dashboard principal (RF-011).
-import { saldoUsd } from '../../lib/money'
-import type { PedidoParaSaldo } from './api'
+import { mensajeDeError } from '../../lib/errores'
+import { agruparSaldos, type SaldoAgrupado } from '../../lib/saldos'
 import { usePedidosParaSaldos, useProductosConStock } from './useDashboard'
-
-const EPSILON = 0.005
 
 export default function DashboardPage() {
   const { data: pedidos, error: errorPedidos } = usePedidosParaSaldos()
   const { data: productos, error: errorProductos } = useProductosConStock()
 
   if (errorPedidos) {
-    return <p role="alert">No se pudo cargar los saldos: {(errorPedidos as Error).message}</p>
+    return <p role="alert">No se pudo cargar los saldos: {mensajeDeError(errorPedidos)}</p>
   }
   if (errorProductos) {
-    return <p role="alert">No se pudo cargar el stock: {(errorProductos as Error).message}</p>
+    return <p role="alert">No se pudo cargar el stock: {mensajeDeError(errorProductos)}</p>
   }
   if (!pedidos || !productos) return <p>Cargando...</p>
 
@@ -64,32 +62,7 @@ export default function DashboardPage() {
   )
 }
 
-function agruparSaldos(
-  pedidos: PedidoParaSaldo[],
-  nombreDe: (p: PedidoParaSaldo) => string | undefined,
-): { nombre: string; saldo: number }[] {
-  const totales = new Map<string, number>()
-  for (const pedido of pedidos) {
-    const nombre = nombreDe(pedido) ?? '—'
-    const saldo = saldoUsd(
-      { monto: pedido.monto_total, moneda: pedido.moneda, tasa_bs_por_usd: pedido.tasa_bs_por_usd },
-      pedido.abonos,
-    )
-    totales.set(nombre, (totales.get(nombre) ?? 0) + saldo)
-  }
-  return Array.from(totales.entries())
-    .map(([nombre, saldo]) => ({ nombre, saldo }))
-    .filter(({ saldo }) => saldo > EPSILON)
-    .sort((a, b) => b.saldo - a.saldo)
-}
-
-function SaldosTable({
-  saldos,
-  vacioLabel,
-}: {
-  saldos: { nombre: string; saldo: number }[]
-  vacioLabel: string
-}) {
+function SaldosTable({ saldos, vacioLabel }: { saldos: SaldoAgrupado[]; vacioLabel: string }) {
   if (saldos.length === 0) return <p>{vacioLabel}</p>
 
   return (
@@ -104,7 +77,13 @@ function SaldosTable({
         {saldos.map(({ nombre, saldo }) => (
           <tr key={nombre}>
             <td>{nombre}</td>
-            <td>{saldo.toFixed(2)}</td>
+            <td>
+              {saldo < 0 ? (
+                <span className="badge badge-saldado">A favor: {Math.abs(saldo).toFixed(2)}</span>
+              ) : (
+                saldo.toFixed(2)
+              )}
+            </td>
           </tr>
         ))}
       </tbody>

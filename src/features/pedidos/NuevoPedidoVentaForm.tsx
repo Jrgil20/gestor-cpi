@@ -1,5 +1,7 @@
 // RF-005 — Registro de pedidos de venta (puede quedar pendiente de entrega).
 import { useState, type FormEvent } from 'react'
+import { mensajeDeError } from '../../lib/errores'
+import { getUltimaTasa, guardarUltimaTasa } from '../../lib/tasa'
 import { hoyLocal } from '../../lib/fecha'
 import type { Moneda } from '../../types/entities'
 import type { PedidoItemInput } from './api'
@@ -13,7 +15,7 @@ export function NuevoPedidoVentaForm() {
 
   const [clienteId, setClienteId] = useState('')
   const [moneda, setMoneda] = useState<Moneda>('USD')
-  const [tasa, setTasa] = useState(1)
+  const [tasa, setTasa] = useState(getUltimaTasa())
   const [fecha, setFecha] = useState(hoyLocal())
   const [entregaInmediata, setEntregaInmediata] = useState(false)
   const [items, setItems] = useState<PedidoItemInput[]>([])
@@ -46,7 +48,12 @@ export function NuevoPedidoVentaForm() {
 
     crear.mutate(
       { cliente_id: clienteId, moneda, tasa_bs_por_usd: tasa, fecha, entregaInmediata, items },
-      { onSuccess: reset },
+      {
+        onSuccess: () => {
+          guardarUltimaTasa(tasa)
+          reset()
+        },
+      },
     )
   }
 
@@ -90,7 +97,7 @@ export function NuevoPedidoVentaForm() {
 
       <PedidoItemsEditor productos={productos} items={items} onChange={setItems} />
 
-      {crear.isError && <p role="alert">No se pudo registrar: {(crear.error as Error).message}</p>}
+      {crear.isError && <p role="alert">No se pudo registrar: {mensajeDeError(crear.error)}</p>}
 
       <button type="submit" disabled={crear.isPending || !clienteId || items.length === 0}>
         Registrar venta
