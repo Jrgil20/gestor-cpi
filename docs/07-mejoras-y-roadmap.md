@@ -2,6 +2,8 @@
 
 Resultado de una revisión a fondo del código tras completar el MVP (F-01…F-07, F-09, RNF-006). Cada hallazgo indica severidad, esfuerzo estimado y por qué importa. El estado global es sólido para un MVP — build, lint y pruebas en verde, errores de red manejados — pero hay bugs reales de baja visibilidad y vacíos funcionales que conviene atender antes de uso diario.
 
+> **Estado de ejecución:** todos los puntos P1, P2 y P3.1/P3.2 fueron ejecutados (el usuario delegó las decisiones; quedaron registradas en la sección final). Pendiente únicamente lo que requiere cuentas del usuario: P3.3 (proyecto Supabase) y P3.4 (hosting). Ver "Decisiones tomadas y estado final".
+
 ## P1 — Correcciones (bugs reales)
 
 ### 1.1 La fecha se registra en UTC, no en hora local ⚠️ el más urgente
@@ -77,3 +79,34 @@ Vender/entregar más unidades de las disponibles deja stock negativo silenciosam
 ```
 
 Los pasos 1-5 son ejecutables de inmediato sin decisiones pendientes; el 6 necesita las credenciales de Supabase y una cuenta de hosting; el 7 necesita las definiciones de la tabla anterior.
+
+---
+
+## Decisiones tomadas y estado final
+
+El usuario delegó las decisiones de producto. Lo decidido y ejecutado:
+
+| Punto | Decisión | Estado |
+|---|---|---|
+| 1.1 Fecha UTC | `hoyLocal()` en `src/lib/fecha.ts` | ✅ Hecho |
+| 1.2 Transaccionalidad | RPCs plpgsql en `supabase/schema.sql` (`crear_pedido_compra/venta`, `marcar_venta_entregada` con guard de idempotencia, `anular_pedido`); `adjust_stock` eliminada | ✅ Hecho |
+| 1.3 Anulación | Botón "Anular" con confirmación; revierte stock; bloqueada si hay abonos (se eliminan primero) | ✅ Hecho |
+| 1.4 Sobreabono | Validado contra el saldo normalizado en `AbonoForm` | ✅ Hecho |
+| 1.5 Stock negativo | Aviso con confirmación, sin bloquear (vender por adelantado es legítimo) | ✅ Hecho |
+| 2.1 Última tasa | Recordada en localStorage (`src/lib/tasa.ts`) | ✅ Hecho |
+| 2.2 Corrección de capturas | Eliminar abonos + anular pedidos; **sin** edición de pedidos (anular + recrear la cubre) | ✅ Hecho |
+| 2.3 Créditos | Visibles como badge "A favor" en el dashboard; `agruparSaldos` extraída a `src/lib/saldos.ts` | ✅ Hecho |
+| 2.4 Errores | `mensajeDeError()` en `src/lib/errores.ts`, aplicado en toda la UI (incluye manejo de PostgrestError, que no es `instanceof Error`) | ✅ Hecho |
+| 2.5 Respaldo local | **Mantener el espejo sin fallback de lectura** (supuesto 4: no hay modo offline); se añadió indicador de última sincronización en la navegación | ✅ Hecho |
+| 2.6 Bundle | Rutas lazy + vendors en chunks propios; sin aviso de build | ✅ Hecho |
+| P3.1 CI | `.github/workflows/ci.yml`: lint + test + build en cada push/PR a main | ✅ Hecho |
+| P3.2 Pruebas | 16 pruebas (money + saldos, incluye créditos y monedas mezcladas) | ✅ Hecho |
+| PWA vs Capacitor | **PWA mínima** (manifest + theme-color); sin service worker porque no hay modo offline | ✅ Hecho |
+| F-08 Multi-usuario | **Diferido** hasta backend real y necesidad concreta; modelo decidido: roles `admin`/`operador` con tabla de perfiles + políticas RLS por rol | ⏳ Diferido |
+| Abonos por contraparte | **No** en esta versión: cambia el modelo de datos; se reevalúa con uso real | ⏳ Diferido |
+| Búsqueda/filtros | Diferido hasta tener volumen real de datos | ⏳ Diferido |
+
+**Pendiente del usuario (único bloqueo):**
+
+1. Crear el proyecto en supabase.com, aplicar `supabase/schema.sql`, crear su usuario (Authentication → Users) y completar `.env` → habilita la validación end-to-end (P3.3).
+2. Cuenta de hosting estático para el despliegue (P3.4).

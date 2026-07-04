@@ -19,7 +19,7 @@ Este repositorio parte de su documentación fundacional, generada durante la fas
 
 ## Desarrollo
 
-Stack: React + Vite + TypeScript, Supabase (datos + auth), Dexie/IndexedDB (respaldo local). Web primero; Capacitor se incorpora post-MVP.
+Stack: React + Vite + TypeScript, Supabase (datos + auth), Dexie/IndexedDB (respaldo local). Web primero, instalable como PWA (manifest mínimo, sin modo offline). CI en GitHub Actions (lint + test + build).
 
 ```bash
 npm install

@@ -102,7 +102,8 @@ Reglas:
 | 4 | Dashboard principal | F-06 | ✅ Hecha |
 | 5 | Respaldo local + sincronización al iniciar | F-07 | ✅ Hecha (pull al iniciar; el fallback de lectura por pantalla quedó fuera, ver nota) |
 | post-MVP | Vistas secundarias | F-09 | ✅ Hecha |
-| post-MVP | Multi-usuario con roles/cuentas, Capacitor | F-08 | ⏳ Pendiente de definir el modelo de roles con el usuario |
+| post-MVP | Multi-usuario con roles/cuentas | F-08 | ⏳ Diferido hasta backend real; modelo decidido: roles `admin`/`operador` (perfiles + RLS por rol) |
+| post-MVP | App instalable | — | ✅ PWA mínima (manifest); Capacitor descartado por ahora |
 
 Cada iteración termina usable y desplegada; el criterio de éxito del MVP (RNF-001) se valida al cierre de la iteración 4.
 
