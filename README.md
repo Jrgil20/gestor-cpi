@@ -14,3 +14,16 @@ Este repositorio parte de su documentación fundacional, generada durante la fas
 | [03-requisitos-no-funcionales.md](docs/03-requisitos-no-funcionales.md) | Requisitos no funcionales (RNF) con métricas |
 | [04-features.md](docs/04-features.md) | Features, priorización MoSCoW y trazabilidad RF↔Feature |
 | [05-stack-sugerido.md](docs/05-stack-sugerido.md) | Stack tecnológico sugerido (no decisión cerrada) |
+| [06-arquitectura.md](docs/06-arquitectura.md) | Modelo de datos, sincronización, estructura de la app y roadmap |
+
+## Desarrollo
+
+Stack: React + Vite + TypeScript, Supabase (datos + auth), Dexie/IndexedDB (respaldo local). Web primero; Capacitor se incorpora post-MVP.
+
+```bash
+npm install
+cp .env.example .env   # completar credenciales de Supabase
+npm run dev
+```
+
+El esquema de base de datos se aplica ejecutando [supabase/schema.sql](supabase/schema.sql) en el SQL Editor del proyecto Supabase.

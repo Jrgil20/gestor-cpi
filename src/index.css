@@ -1,0 +1,30 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #8884;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  text-decoration: none;
+}
+
+.nav a.active {
+  font-weight: bold;
+}
