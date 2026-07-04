@@ -15,6 +15,7 @@ Este repositorio parte de su documentación fundacional, generada durante la fas
 | [04-features.md](docs/04-features.md) | Features, priorización MoSCoW y trazabilidad RF↔Feature |
 | [05-stack-sugerido.md](docs/05-stack-sugerido.md) | Stack tecnológico sugerido (no decisión cerrada) |
 | [06-arquitectura.md](docs/06-arquitectura.md) | Modelo de datos, sincronización, estructura de la app y roadmap |
+| [07-mejoras-y-roadmap.md](docs/07-mejoras-y-roadmap.md) | Revisión post-MVP: bugs conocidos, mejoras y próximas features |
 
 ## Desarrollo
 
