@@ -1,8 +1,9 @@
-// F-02/F-05 — Pedidos de compra y venta con movimiento de stock (RF-004,
-// RF-005, RF-009). Las CxP/CxC (RF-006) no se leen aquí: se derivan de
-// pedidos + abonos en la feature de abonos (iteración 3).
+// F-02/F-05/F-03 — Pedidos de compra y venta con movimiento de stock
+// (RF-004, RF-005, RF-009) y abonos parciales (RF-006, RF-007). El saldo no
+// se almacena: se calcula con saldoUsd() a partir del pedido y sus abonos.
 import { supabase } from '../../lib/supabase'
 import type { Cliente, EstadoPedido, Moneda, Pedido, Proveedor } from '../../types/entities'
+import type { MontoConTasa } from '../../lib/money'
 
 export interface PedidoItemInput {
   producto_id: string
@@ -20,10 +21,11 @@ export interface PedidoConDetalle extends Pedido {
   proveedor: { nombre: string } | null
   cliente: { nombre: string } | null
   items: PedidoItemDetalle[]
+  abonos: MontoConTasa[]
 }
 
 const PEDIDO_SELECT =
-  '*, proveedor:proveedores(nombre), cliente:clientes(nombre), items:pedido_items(cantidad, precio_unitario, producto:productos(nombre))'
+  '*, proveedor:proveedores(nombre), cliente:clientes(nombre), items:pedido_items(cantidad, precio_unitario, producto:productos(nombre)), abonos:abonos(monto, moneda, tasa_bs_por_usd)'
 
 export async function listPedidos(): Promise<PedidoConDetalle[]> {
   const { data, error } = await supabase
@@ -179,4 +181,18 @@ export async function marcarVentaEntregada(pedidoId: string): Promise<void> {
     .update({ estado: 'entregado' })
     .eq('id', pedidoId)
   if (updateError) throw updateError
+}
+
+export interface CrearAbonoInput {
+  pedido_id: string
+  monto: number
+  moneda: Moneda
+  tasa_bs_por_usd: number
+  fecha: string
+}
+
+/** RF-007: abono parcial; el saldo restante se deriva, no se almacena. */
+export async function crearAbono(input: CrearAbonoInput): Promise<void> {
+  const { error } = await supabase.from('abonos').insert(input)
+  if (error) throw error
 }

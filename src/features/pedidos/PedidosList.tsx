@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { aBs, aUsd } from '../../lib/money'
+import { aBs, aUsd, saldoUsd } from '../../lib/money'
+import { AbonoForm } from './AbonoForm'
 import type { PedidoConDetalle } from './api'
 import { useMarcarVentaEntregada, usePedidos } from './usePedidos'
+
+const SALDO_EPSILON = 0.005
 
 const ESTADO_LABEL: Record<string, string> = {
   registrado: 'Registrado',
@@ -28,6 +31,7 @@ export function PedidosList() {
           <th>Contraparte</th>
           <th>Estado</th>
           <th>Total</th>
+          <th>Saldo</th>
           <th></th>
         </tr>
       </thead>
@@ -66,6 +70,8 @@ function PedidoRow({
     moneda: pedido.moneda,
     tasa_bs_por_usd: pedido.tasa_bs_por_usd,
   }
+  const saldo = saldoUsd(montoConTasa, pedido.abonos)
+  const saldada = saldo <= SALDO_EPSILON
 
   return (
     <>
@@ -77,6 +83,7 @@ function PedidoRow({
         <td>
           {aUsd(montoConTasa).toFixed(2)} USD (≈ {aBs(montoConTasa).toFixed(2)} Bs)
         </td>
+        <td>{saldada ? 'Saldado' : `${saldo.toFixed(2)} USD`}</td>
         <td>
           <button type="button" onClick={onToggle}>
             {expanded ? 'Ocultar' : 'Ver detalle'}
@@ -90,7 +97,7 @@ function PedidoRow({
       </tr>
       {expanded && (
         <tr>
-          <td colSpan={6}>
+          <td colSpan={7}>
             <ul>
               {pedido.items.map((item, i) => (
                 <li key={i}>
@@ -98,6 +105,20 @@ function PedidoRow({
                 </li>
               ))}
             </ul>
+
+            <h3>Abonos</h3>
+            {pedido.abonos.length === 0 ? (
+              <p>Sin abonos todavía.</p>
+            ) : (
+              <ul>
+                {pedido.abonos.map((abono, i) => (
+                  <li key={i}>
+                    {abono.monto} {abono.moneda}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {!saldada && <AbonoForm pedidoId={pedido.id} />}
           </td>
         </tr>
       )}

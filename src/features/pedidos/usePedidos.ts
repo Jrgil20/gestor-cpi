@@ -52,3 +52,11 @@ export function useMarcarVentaEntregada() {
     },
   })
 }
+
+export function useCrearAbono() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: api.crearAbono,
+    onSuccess: () => qc.invalidateQueries({ queryKey: pedidosKey }),
+  })
+}
