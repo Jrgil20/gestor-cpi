@@ -62,6 +62,15 @@ create table abonos (
   created_at timestamptz not null default now()
 );
 
+-- Ajuste atómico de stock (RF-009): evita el patrón leer-modificar-escribir
+-- desde el cliente al registrar compras o marcar ventas como entregadas.
+create function adjust_stock(p_producto_id uuid, delta numeric)
+returns void
+language sql
+as $$
+  update productos set stock = stock + delta where id = p_producto_id;
+$$;
+
 create index pedidos_proveedor_idx on pedidos (proveedor_id) where proveedor_id is not null;
 create index pedidos_cliente_idx on pedidos (cliente_id) where cliente_id is not null;
 create index pedido_items_pedido_idx on pedido_items (pedido_id);
