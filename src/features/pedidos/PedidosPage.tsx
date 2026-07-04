@@ -13,11 +13,19 @@ export default function PedidosPage() {
     <section>
       <h1>Pedidos</h1>
 
-      <div className="nav">
-        <button type="button" onClick={() => setTab('compra')} disabled={tab === 'compra'}>
+      <div className="tabs">
+        <button
+          type="button"
+          className={tab === 'compra' ? 'tab-active' : ''}
+          onClick={() => setTab('compra')}
+        >
           Nueva compra
         </button>
-        <button type="button" onClick={() => setTab('venta')} disabled={tab === 'venta'}>
+        <button
+          type="button"
+          className={tab === 'venta' ? 'tab-active' : ''}
+          onClick={() => setTab('venta')}
+        >
           Nueva venta
         </button>
       </div>

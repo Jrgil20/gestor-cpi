@@ -79,11 +79,20 @@ function PedidoRow({
         <td>{pedido.fecha}</td>
         <td>{pedido.tipo === 'compra' ? 'Compra' : 'Venta'}</td>
         <td>{contraparte}</td>
-        <td>{ESTADO_LABEL[pedido.estado]}</td>
         <td>
-          {aUsd(montoConTasa).toFixed(2)} USD (≈ {aBs(montoConTasa).toFixed(2)} Bs)
+          <span className={`badge badge-${pedido.estado}`}>{ESTADO_LABEL[pedido.estado]}</span>
         </td>
-        <td>{saldada ? 'Saldado' : `${saldo.toFixed(2)} USD`}</td>
+        <td>
+          {aUsd(montoConTasa).toFixed(2)} USD{' '}
+          <span className="muted">(≈ {aBs(montoConTasa).toFixed(2)} Bs)</span>
+        </td>
+        <td>
+          {saldada ? (
+            <span className="badge badge-saldado">Saldado</span>
+          ) : (
+            <span className="badge badge-saldo">{saldo.toFixed(2)} USD</span>
+          )}
+        </td>
         <td>
           <button type="button" onClick={onToggle}>
             {expanded ? 'Ocultar' : 'Ver detalle'}

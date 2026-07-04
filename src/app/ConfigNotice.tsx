@@ -2,9 +2,10 @@
 // escribir datos (es un límite del sistema, no un modo de trabajo soportado).
 export default function ConfigNotice() {
   return (
-    <div className="layout">
-      <h1>Gestor-cpi</h1>
-      <p>Falta configurar la conexión a Supabase.</p>
+    <div className="auth-shell">
+      <div className="auth-card config-card">
+        <h1>Gestor-cpi</h1>
+        <p>Falta configurar la conexión a Supabase.</p>
       <ol>
         <li>
           Copia <code>.env.example</code> a <code>.env</code>.
@@ -18,7 +19,8 @@ export default function ConfigNotice() {
           hiciste.
         </li>
         <li>Reinicia el servidor de desarrollo.</li>
-      </ol>
+        </ol>
+      </div>
     </div>
   )
 }

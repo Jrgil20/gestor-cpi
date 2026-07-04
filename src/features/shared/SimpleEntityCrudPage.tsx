@@ -105,7 +105,7 @@ function SimpleEntityTable<T extends SimpleEntity>({
               <td>
                 <input value={editContacto} onChange={(e) => setEditContacto(e.target.value)} />
               </td>
-              <td>{item.activo ? 'Activo' : 'Inactivo'}</td>
+              <td><span className={item.activo ? 'badge badge-activo' : 'badge badge-inactivo'}>{item.activo ? 'Activo' : 'Inactivo'}</span></td>
               <td>
                 <button onClick={() => saveEdit(item.id)} disabled={actualizar.isPending}>
                   Guardar
@@ -117,7 +117,7 @@ function SimpleEntityTable<T extends SimpleEntity>({
             <tr key={item.id}>
               <td>{item.nombre}</td>
               <td>{item.contacto ?? '—'}</td>
-              <td>{item.activo ? 'Activo' : 'Inactivo'}</td>
+              <td><span className={item.activo ? 'badge badge-activo' : 'badge badge-inactivo'}>{item.activo ? 'Activo' : 'Inactivo'}</span></td>
               <td>
                 <button onClick={() => startEdit(item)}>Editar</button>
                 <button onClick={() => setActivo.mutate({ id: item.id, activo: !item.activo })}>

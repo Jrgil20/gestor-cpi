@@ -80,7 +80,7 @@ function ProductosTable({ productos }: { productos: Producto[] }) {
                 <input value={editNombre} onChange={(e) => setEditNombre(e.target.value)} />
               </td>
               <td>{p.stock}</td>
-              <td>{p.activo ? 'Activo' : 'Inactivo'}</td>
+              <td><span className={p.activo ? 'badge badge-activo' : 'badge badge-inactivo'}>{p.activo ? 'Activo' : 'Inactivo'}</span></td>
               <td>
                 <button onClick={() => saveEdit(p.id)} disabled={actualizar.isPending}>
                   Guardar
@@ -92,7 +92,7 @@ function ProductosTable({ productos }: { productos: Producto[] }) {
             <tr key={p.id}>
               <td>{p.nombre}</td>
               <td>{p.stock}</td>
-              <td>{p.activo ? 'Activo' : 'Inactivo'}</td>
+              <td><span className={p.activo ? 'badge badge-activo' : 'badge badge-inactivo'}>{p.activo ? 'Activo' : 'Inactivo'}</span></td>
               <td>
                 <button onClick={() => startEdit(p)}>Editar</button>
                 <button onClick={() => setActivo.mutate({ id: p.id, activo: !p.activo })}>

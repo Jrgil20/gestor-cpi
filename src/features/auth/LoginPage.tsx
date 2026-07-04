@@ -20,29 +20,33 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="layout">
-      <h1>Gestor-cpi</h1>
-      <form onSubmit={handleSubmit} className="entity-form">
-        <input
-          type="email"
-          placeholder="Correo"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={loading}>
-          Iniciar sesión
-        </button>
-      </form>
-      {error && <p role="alert">{error}</p>}
-      <p>El usuario se crea desde el dashboard de Supabase (Authentication → Users → Add user).</p>
+    <div className="auth-shell">
+      <div className="auth-card">
+        <h1>Gestor-cpi</h1>
+        <form onSubmit={handleSubmit} className="entity-form">
+          <input
+            type="email"
+            placeholder="Correo"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" disabled={loading}>
+            Iniciar sesión
+          </button>
+        </form>
+        {error && <p role="alert">{error}</p>}
+        <p className="muted">
+          El usuario se crea desde el dashboard de Supabase (Authentication → Users → Add user).
+        </p>
+      </div>
     </div>
   )
 }
