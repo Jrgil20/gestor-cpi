@@ -24,6 +24,8 @@ Stack: React + Vite + TypeScript, Supabase (datos + auth), Dexie/IndexedDB (resp
 npm install
 cp .env.example .env   # completar credenciales de Supabase
 npm run dev
+npm test               # pruebas unitarias (lógica dual moneda)
+npm run lint           # oxlint
 ```
 
 El esquema de base de datos se aplica ejecutando [supabase/schema.sql](supabase/schema.sql) en el SQL Editor del proyecto Supabase.

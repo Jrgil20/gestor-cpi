@@ -93,17 +93,24 @@ Reglas:
 
 ## Roadmap de iteraciones
 
-| It. | Entrega | Features |
-|---|---|---|
-| 0 | Scaffolding + esquema Supabase + login | (esta fase) |
-| 1 | CRUD proveedores, clientes, productos | F-01 |
-| 2 | Pedidos de compra/venta + movimientos de stock | F-02, F-05 |
-| 3 | Abonos y saldos con dual moneda | F-03, F-04 |
-| 4 | Dashboard principal | F-06 |
-| 5 | Respaldo local + sincronización al iniciar | F-07 |
-| post-MVP | Vistas secundarias, multi-usuario, Capacitor | F-09, F-08 |
+| It. | Entrega | Features | Estado |
+|---|---|---|---|
+| 0 | Scaffolding + esquema Supabase + login | (esta fase) | ✅ Hecha (login se completó junto con F-09) |
+| 1 | CRUD proveedores, clientes, productos | F-01 | ✅ Hecha |
+| 2 | Pedidos de compra/venta + movimientos de stock | F-02, F-05 | ✅ Hecha |
+| 3 | Abonos y saldos con dual moneda | F-03, F-04 | ✅ Hecha |
+| 4 | Dashboard principal | F-06 | ✅ Hecha |
+| 5 | Respaldo local + sincronización al iniciar | F-07 | ✅ Hecha (pull al iniciar; el fallback de lectura por pantalla quedó fuera, ver nota) |
+| post-MVP | Vistas secundarias | F-09 | ✅ Hecha |
+| post-MVP | Multi-usuario con roles/cuentas, Capacitor | F-08 | ⏳ Pendiente de definir el modelo de roles con el usuario |
 
 Cada iteración termina usable y desplegada; el criterio de éxito del MVP (RNF-001) se valida al cierre de la iteración 4.
+
+**Notas de implementación:**
+
+- Toda la funcionalidad está verificada con typecheck, build, lint y pruebas de humo en navegador contra un backend inalcanzable (manejo de errores). La validación de extremo a extremo con datos reales queda pendiente de configurar el proyecto Supabase (ver `.env.example`).
+- El fallback de lectura offline por pantalla (servir desde IndexedDB cuando una lectura en vivo falla) no se construyó: el supuesto 4 dice que no se requiere modo offline, y reconstruir las relaciones desde Dexie es complejidad real para un caso hipotético. Se reevalúa con uso real.
+- La regla de conversión dual moneda (`src/lib/money.ts`) tiene pruebas unitarias (`npm test`).
 
 ## Qué queda fuera de este documento
 
