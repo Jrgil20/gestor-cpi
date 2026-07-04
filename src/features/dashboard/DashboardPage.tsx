@@ -6,27 +6,23 @@ import { usePedidosParaSaldos, useProductosConStock } from './useDashboard'
 const EPSILON = 0.005
 
 export default function DashboardPage() {
-  const { data: pedidos, isLoading: cargandoPedidos, error: errorPedidos } = usePedidosParaSaldos()
-  const {
-    data: productos,
-    isLoading: cargandoProductos,
-    error: errorProductos,
-  } = useProductosConStock()
+  const { data: pedidos, error: errorPedidos } = usePedidosParaSaldos()
+  const { data: productos, error: errorProductos } = useProductosConStock()
 
-  if (cargandoPedidos || cargandoProductos) return <p>Cargando...</p>
   if (errorPedidos) {
     return <p role="alert">No se pudo cargar los saldos: {(errorPedidos as Error).message}</p>
   }
   if (errorProductos) {
     return <p role="alert">No se pudo cargar el stock: {(errorProductos as Error).message}</p>
   }
+  if (!pedidos || !productos) return <p>Cargando...</p>
 
   const saldosPorCliente = agruparSaldos(
-    pedidos!.filter((p) => p.tipo === 'venta'),
+    pedidos.filter((p) => p.tipo === 'venta'),
     (p) => p.cliente?.nombre,
   )
   const saldosPorProveedor = agruparSaldos(
-    pedidos!.filter((p) => p.tipo === 'compra'),
+    pedidos.filter((p) => p.tipo === 'compra'),
     (p) => p.proveedor?.nombre,
   )
 
@@ -44,7 +40,7 @@ export default function DashboardPage() {
       />
 
       <h2>Stock disponible</h2>
-      {productos!.length === 0 ? (
+      {productos.length === 0 ? (
         <p>Todavía no hay productos.</p>
       ) : (
         <table>
@@ -55,7 +51,7 @@ export default function DashboardPage() {
             </tr>
           </thead>
           <tbody>
-            {productos!.map((p) => (
+            {productos.map((p) => (
               <tr key={p.id}>
                 <td>{p.nombre}</td>
                 <td>{p.stock}</td>
