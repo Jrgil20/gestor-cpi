@@ -1,8 +1,7 @@
-// F-01 — Gestión de clientes (RF-002). Placeholder: se implementa en la iteración 1.
+// F-01 — Gestión de clientes (RF-002).
+import { SimpleEntityCrudPage } from '../shared/SimpleEntityCrudPage'
+import { clientesCrud } from './crud'
+
 export default function ClientesPage() {
-  return (
-    <section>
-      <h1>Clientes</h1>
-    </section>
-  )
+  return <SimpleEntityCrudPage title="Clientes" crud={clientesCrud} />
 }

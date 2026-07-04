@@ -1,8 +1,7 @@
-// F-01 — Gestión de proveedores (RF-001). Placeholder: se implementa en la iteración 1.
+// F-01 — Gestión de proveedores (RF-001).
+import { SimpleEntityCrudPage } from '../shared/SimpleEntityCrudPage'
+import { proveedoresCrud } from './crud'
+
 export default function ProveedoresPage() {
-  return (
-    <section>
-      <h1>Proveedores</h1>
-    </section>
-  )
+  return <SimpleEntityCrudPage title="Proveedores" crud={proveedoresCrud} />
 }
