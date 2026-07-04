@@ -2,7 +2,7 @@
 // (RF-004, RF-005, RF-009) y abonos parciales (RF-006, RF-007). El saldo no
 // se almacena: se calcula con saldoUsd() a partir del pedido y sus abonos.
 import { supabase } from '../../lib/supabase'
-import type { Cliente, EstadoPedido, Moneda, Pedido, Proveedor } from '../../types/entities'
+import type { Cliente, Moneda, Pedido, Proveedor } from '../../types/entities'
 import type { MontoConTasa } from '../../lib/money'
 
 export interface PedidoItemInput {
@@ -14,18 +14,22 @@ export interface PedidoItemInput {
 export interface PedidoItemDetalle {
   cantidad: number
   precio_unitario: number
-  producto: { nombre: string } | null
+  producto: { nombre: string; stock: number } | null
+}
+
+export interface AbonoResumen extends MontoConTasa {
+  id: string
 }
 
 export interface PedidoConDetalle extends Pedido {
   proveedor: { nombre: string } | null
   cliente: { nombre: string } | null
   items: PedidoItemDetalle[]
-  abonos: MontoConTasa[]
+  abonos: AbonoResumen[]
 }
 
 const PEDIDO_SELECT =
-  '*, proveedor:proveedores(nombre), cliente:clientes(nombre), items:pedido_items(cantidad, precio_unitario, producto:productos(nombre)), abonos:abonos(monto, moneda, tasa_bs_por_usd)'
+  '*, proveedor:proveedores(nombre), cliente:clientes(nombre), items:pedido_items(cantidad, precio_unitario, producto:productos(nombre, stock)), abonos:abonos(id, monto, moneda, tasa_bs_por_usd)'
 
 export async function listPedidos(): Promise<PedidoConDetalle[]> {
   const { data, error } = await supabase
@@ -57,49 +61,21 @@ export async function listClientesActivos(): Promise<Pick<Cliente, 'id' | 'nombr
   return data
 }
 
-export async function listProductosActivos(): Promise<{ id: string; nombre: string }[]> {
+export async function listProductosActivos(): Promise<
+  { id: string; nombre: string; stock: number }[]
+> {
   const { data, error } = await supabase
     .from('productos')
-    .select('id, nombre')
+    .select('id, nombre, stock')
     .eq('activo', true)
     .order('nombre')
   if (error) throw error
   return data
 }
 
-function montoTotal(items: PedidoItemInput[]): number {
-  return items.reduce((sum, item) => sum + item.cantidad * item.precio_unitario, 0)
-}
-
-async function insertPedidoConItems(
-  pedido: {
-    tipo: 'compra' | 'venta'
-    proveedor_id: string | null
-    cliente_id: string | null
-    estado: EstadoPedido
-    moneda: Moneda
-    tasa_bs_por_usd: number
-    fecha: string
-  },
-  items: PedidoItemInput[],
-): Promise<string> {
-  const { data, error } = await supabase
-    .from('pedidos')
-    .insert({ ...pedido, monto_total: montoTotal(items) })
-    .select('id')
-    .single()
-  if (error) throw error
-
-  const { error: itemsError } = await supabase
-    .from('pedido_items')
-    .insert(items.map((item) => ({ ...item, pedido_id: data.id })))
-  if (itemsError) throw itemsError
-
-  return data.id as string
-}
-
-async function adjustStock(producto_id: string, delta: number): Promise<void> {
-  const { error } = await supabase.rpc('adjust_stock', { p_producto_id: producto_id, delta })
+/** RF-007 (corrección): eliminar un abono mal capturado. */
+export async function eliminarAbono(abonoId: string): Promise<void> {
+  const { error } = await supabase.from('abonos').delete().eq('id', abonoId)
   if (error) throw error
 }
 
@@ -111,24 +87,16 @@ export interface CrearPedidoCompraInput {
   items: PedidoItemInput[]
 }
 
-/** RF-004 + RF-009: registrar compra e ingresar el stock comprado de inmediato. */
+/** RF-004 + RF-009: registrar compra e ingresar el stock, en una transacción (RPC). */
 export async function crearPedidoCompra(input: CrearPedidoCompraInput): Promise<void> {
-  await insertPedidoConItems(
-    {
-      tipo: 'compra',
-      proveedor_id: input.proveedor_id,
-      cliente_id: null,
-      estado: 'registrado',
-      moneda: input.moneda,
-      tasa_bs_por_usd: input.tasa_bs_por_usd,
-      fecha: input.fecha,
-    },
-    input.items,
-  )
-
-  for (const item of input.items) {
-    await adjustStock(item.producto_id, item.cantidad)
-  }
+  const { error } = await supabase.rpc('crear_pedido_compra', {
+    p_proveedor_id: input.proveedor_id,
+    p_moneda: input.moneda,
+    p_tasa_bs_por_usd: input.tasa_bs_por_usd,
+    p_fecha: input.fecha,
+    p_items: input.items,
+  })
+  if (error) throw error
 }
 
 export interface CrearPedidoVentaInput {
@@ -140,47 +108,29 @@ export interface CrearPedidoVentaInput {
   items: PedidoItemInput[]
 }
 
-/** RF-005 + RF-009: registrar venta; solo descuenta stock si se entrega de inmediato. */
+/** RF-005 + RF-009: registrar venta (descuenta stock solo si se entrega), en una transacción (RPC). */
 export async function crearPedidoVenta(input: CrearPedidoVentaInput): Promise<void> {
-  const estado: EstadoPedido = input.entregaInmediata ? 'entregado' : 'pendiente_entrega'
-
-  await insertPedidoConItems(
-    {
-      tipo: 'venta',
-      proveedor_id: null,
-      cliente_id: input.cliente_id,
-      estado,
-      moneda: input.moneda,
-      tasa_bs_por_usd: input.tasa_bs_por_usd,
-      fecha: input.fecha,
-    },
-    input.items,
-  )
-
-  if (input.entregaInmediata) {
-    for (const item of input.items) {
-      await adjustStock(item.producto_id, -item.cantidad)
-    }
-  }
+  const { error } = await supabase.rpc('crear_pedido_venta', {
+    p_cliente_id: input.cliente_id,
+    p_moneda: input.moneda,
+    p_tasa_bs_por_usd: input.tasa_bs_por_usd,
+    p_fecha: input.fecha,
+    p_entrega_inmediata: input.entregaInmediata,
+    p_items: input.items,
+  })
+  if (error) throw error
 }
 
-/** RF-009: al entregar un encargo pendiente, ahora sí se descuenta el stock. */
+/** RF-009: entregar un encargo pendiente descontando stock, en una transacción (RPC). */
 export async function marcarVentaEntregada(pedidoId: string): Promise<void> {
-  const { data: items, error } = await supabase
-    .from('pedido_items')
-    .select('producto_id, cantidad')
-    .eq('pedido_id', pedidoId)
+  const { error } = await supabase.rpc('marcar_venta_entregada', { p_pedido_id: pedidoId })
   if (error) throw error
+}
 
-  for (const item of items) {
-    await adjustStock(item.producto_id, -item.cantidad)
-  }
-
-  const { error: updateError } = await supabase
-    .from('pedidos')
-    .update({ estado: 'entregado' })
-    .eq('id', pedidoId)
-  if (updateError) throw updateError
+/** Anular un pedido revirtiendo su efecto en stock; bloqueado si tiene abonos (RPC). */
+export async function anularPedido(pedidoId: string): Promise<void> {
+  const { error } = await supabase.rpc('anular_pedido', { p_pedido_id: pedidoId })
+  if (error) throw error
 }
 
 export interface CrearAbonoInput {

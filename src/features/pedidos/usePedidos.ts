@@ -60,3 +60,22 @@ export function useCrearAbono() {
     onSuccess: () => qc.invalidateQueries({ queryKey: pedidosKey }),
   })
 }
+
+export function useAnularPedido() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: api.anularPedido,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: pedidosKey })
+      qc.invalidateQueries({ queryKey: productosKey })
+    },
+  })
+}
+
+export function useEliminarAbono() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: api.eliminarAbono,
+    onSuccess: () => qc.invalidateQueries({ queryKey: pedidosKey }),
+  })
+}

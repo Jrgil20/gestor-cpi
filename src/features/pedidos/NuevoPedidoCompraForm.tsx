@@ -1,11 +1,10 @@
 // RF-004 — Registro de pedidos de compra.
 import { useState, type FormEvent } from 'react'
+import { hoyLocal } from '../../lib/fecha'
 import type { Moneda } from '../../types/entities'
 import type { PedidoItemInput } from './api'
 import { PedidoItemsEditor } from './PedidoItemsEditor'
 import { useCrearPedidoCompra, useProductosActivos, useProveedoresActivos } from './usePedidos'
-
-const hoy = () => new Date().toISOString().slice(0, 10)
 
 export function NuevoPedidoCompraForm() {
   const { data: proveedores } = useProveedoresActivos()
@@ -15,7 +14,7 @@ export function NuevoPedidoCompraForm() {
   const [proveedorId, setProveedorId] = useState('')
   const [moneda, setMoneda] = useState<Moneda>('USD')
   const [tasa, setTasa] = useState(1)
-  const [fecha, setFecha] = useState(hoy())
+  const [fecha, setFecha] = useState(hoyLocal())
   const [items, setItems] = useState<PedidoItemInput[]>([])
 
   function reset() {
